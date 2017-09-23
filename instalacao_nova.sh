@@ -32,7 +32,7 @@ for cm in $@; do
         sudo apt autoremove
         sudo apt-get -f install
         sudo apt-get upgrade --assume-yes
-        sudo apt-get install curl git zip vim bash-completion aptitude htop  --assume-yes
+        sudo apt-get install curl git zip vim bash-completion aptitude htop firmware-misc-nonfree --assume-yes
         sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular --assume-yes 
         sudo apt-get install geany gparted wine inkscape shutter filezilla dia vlc gnuplot --assume-yes
         # @TODO:python-libs*
