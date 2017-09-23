@@ -10,23 +10,26 @@ NC='\033[0m' # No Color
 BLUE='\033[0;34m'
 
 if [ -e $OUTPUT ]; then
-	echo -e "${WARN} $0 ja foi executado, deseja reexecutar? {NC}[y/*n*]${NC}"
+	echo -e "${WARN} $0 ja foi executado, deseja reexecutar? {NC}[y/(N)]${NC}"
 	read resp
 	if [[ "$resp" == "n" || "$resp" == "" ]]; then
-        exit 0;
+        	exit 0;
 	else
-	        DATE=`date +%s`
-        	OUTPUT=${OUTPUT%.*}${DATE}"."${OUTPUT##*.} #"run_after${DATE}.sh"
+        	OUTPUT=${OUTPUT%.*}"_"`date +%s`"."${OUTPUT##*.}
+		printf '#!/bin/bash\n' >> $OUTPUT
 	fi
 else
     printf '#!/bin/bash\n' >> $OUTPUT
 fi
+chmod +x $OUTPUT
+
 if [ $# == 0 ]; then
-	echo -e "${WARN} Faltam parametros${NC}\n ${BLUE}Execute: $0 <username> <args:{ config || apt || opencv || java || poweroff/reboot}>${NC}";
+	echo -e "${WARN} Parameters missing.\n Execute: $0 <username> <@args:{ config || apt || opencv || java || poweroff/reboot}>${NC}";
 	exit 0;
 fi
-for cm in $@; do
-    if [ "$cm" == "apt" ]; then 
+
+for param in $@; do
+    if [ "param" == "apt" ]; then 
         sudo apt-get update
         sudo apt-get remove empathy akregator kmail kopete thunderbird pidgin hexchat banshee totem libreoffice-* unity-webapps-common apport --assume-yes
         sudo apt autoremove
@@ -137,7 +140,7 @@ for cm in $@; do
         echo "nvidia-xconfig" >> $OUTPUT
 
     ############## CONFIGURATIONS ###############
-    elif [ "$cm" == "config" ]; then
+    elif [ "param" == "config" ]; then
         sudo usermod -a -G sudo $UUSER
         if sudo grep "$UUSER ALL=(ALL:ALL) ALL" /etc/sudoers; then
             echo -e "${WARN} Sudoers already configured!${NC}"
@@ -173,7 +176,7 @@ for cm in $@; do
     ############## JAVA ORACLE ###############
     ### How to Install JAVA 8 on Linux Systems ##
     ### Comandos retirados de: http://www.tecmint.com/install-java-jdk-jre-in-linux/
-    elif [ "$cm" == "java" ]; then
+    elif [ "param" == "java" ]; then
         MACHINE_TYPE=`uname -m`
         if [ ${MACHINE_TYPE} == "x86_64" ]; then
             ARCH="x64"
@@ -234,7 +237,7 @@ for cm in $@; do
     ############## OpenCV Sources ###############
     ### Baseado em http://www.pyimagesearch.com/2015/07/20/install-opencv-3-0-and-python-3-4-on-ubuntu/
     ## Exemplo modificado de: https://github.com/Tes3awy/OpenCV-3.1.0-Compiling-on-Raspberry-Pi-2-
-    elif [ "$cm" == "opencv" ]; then
+    elif [ "param" == "opencv" ]; then
 		INSTALL_DIR="$UUSER_H/Downloads"
 		VERSION="3.1.0"
 		sudo apt-get update && sudo apt-get upgrade -y
@@ -322,13 +325,13 @@ for cm in $@; do
         fi
 
     ############## REBOOT OR SHUTDOWN ###############
-    elif [ "$cm" == "poweroff" ]; then
+    elif [ "param" == "poweroff" ]; then
         echo -e "${WARN} Shutdown in 10 seconds.\n Clean files...${NC}"
         sudo rm -rf opencv* get-pip.py libpng12* dropbox* teamviewer* google-chrome* draw.io* teste.py
         sudo apt autoremove --assume-yes
         sleep 10
         sudo shutdown now
-    elif [ "$cm" == "reboot" ]; then
+    elif [ "param" == "reboot" ]; then
         echo -e "${WARN} Reboot in 10 seconds.\n Clean files...${NC}"
         sudo rm -rf opencv* get-pip.py libpng12* dropbox* teamviewer* google-chrome* draw.io* teste.py
         sudo apt autoremove --assume-yes
