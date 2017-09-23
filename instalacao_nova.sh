@@ -2,7 +2,7 @@
 
 UUSER="$1"
 UUSER_H="/home/$UUSER"
-OUTPUT="run_after_new_installation.sh"
+OUTPUT="run_after.sh"
 APP="dpkg"
 #Misc:
 WARN='\033[0;31m'
@@ -15,8 +15,8 @@ if [ -e $OUTPUT ]; then
 	if [[ "$resp" == "n" || "$resp" == "" ]]; then
         exit 0;
 	else
-        DATE=`date +%s`
-        OUTPUT="run_after_new_installation${DATE}.sh"
+	        DATE=`date +%s`
+        	OUTPUT=${OUTPUT%.*}${DATE}"."${OUTPUT##*.} #"run_after${DATE}.sh"
 	fi
 else
     printf '#!/bin/bash\n' >> $OUTPUT
