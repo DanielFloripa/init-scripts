@@ -1,0 +1,21 @@
+Use Diskpart command to make a Windows or Linux drive Active
+
+How to make a partition Active using a Windows installation CD/DVD
+
+    Bootup from any full Windows 7 or Vista installation DVD or even from NeoSmart's free Windows 7 System Recovery Disk or Vista Recovery Disk. All four perform identically in this situation. A Restore/Repair CD from an OEM is not sufficient.
+    It must be a 64-bit version if a 64-bit Windows is installed.
+    Select Repair your computer at the Install now screen.
+    Click No if asked to Repair and Restart.
+    Click Cancel if it looks for a Disk Image.
+    Now in System Recovery Options,
+    click the Command Prompt option.
+    Press ENTER after you type in each of these commands which are not case-sensitive:
+        DISKPART     (to open the partition utility)
+        LIST DISK     (disk number(s) will be shown)
+        SELECT DISK n     (where n is the number of the disk - probably 0)
+        LIST PARTITION     (partition number(s) will be shown)
+        SELECT PARTITION n     (where n is the number of the Primary partition you wish to make Active)
+        ACTIVE     (the selected partition on the selected disk will be made Active)
+        EXIT     (to exit DiskPart)
+        EXIT     (to exit the Command Prompt) 
+    Restart computer. 
