@@ -10,17 +10,19 @@ NC='\033[0m' # No Color
 BLUE='\033[0;34m'
 
 if [ -e $OUTPUT ]; then
-	echo -e "${WARN} $0 ja foi executado, deseja reexecutar? {NC}[y/(N)]${NC}"
+	echo -e "${WARN} $0 already executed, whould you like to execute again? ${NC}[y/(N)]${NC}"
 	read resp
-	if [[ "$resp" == "n" || "$resp" == "" ]]; then
+	if [[ "$resp" == "n" ]]; then
         	exit 0;
 	else
         	OUTPUT=${OUTPUT%.*}"_"`date +%s`"."${OUTPUT##*.}
+		echo "Creating new $OUTPUT ..."
 		printf '#!/bin/bash\n' >> $OUTPUT
 	fi
 else
     printf '#!/bin/bash\n' >> $OUTPUT
 fi
+
 chmod +x $OUTPUT
 
 if [ $# == 0 ]; then
@@ -29,17 +31,19 @@ if [ $# == 0 ]; then
 fi
 
 for param in $@; do
-    if [ "param" == "apt" ]; then 
+	echo "Executing: " $param
+    if [ "$param" == "apt" ]; then
         sudo apt-get update
         sudo apt-get remove empathy akregator kmail kopete thunderbird pidgin hexchat banshee totem libreoffice-* unity-webapps-common apport --assume-yes
         sudo apt autoremove
         sudo apt-get -f install
         sudo apt-get upgrade --assume-yes
-        sudo apt-get install curl git zip vim bash-completion aptitude htop firmware-misc-nonfree --assume-yes
+        sudo apt-get install ftp curl git zip vim bash-completion aptitude htop --assume-yes
+	sudo apt-get install firmware-misc-nonfree --assume-yes
         sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular --assume-yes 
         sudo apt-get install geany gparted wine inkscape shutter filezilla dia vlc gnuplot --assume-yes
         # @TODO:python-libs*
-        sudo apt-get install python-all python-pygame python-pil python-serial python-pip --assume-yes
+        sudo apt-get install python3 python-all python-pygame python-pil python-serial python-pip --assume-yes
         sudo apt autoremove --assume-yes
         ### R insync:
         sudo apt-get install r-base r-base-dev insync --assume-yes
@@ -113,7 +117,7 @@ for param in $@; do
             fi
             chmod +x dropbox* 
             sudo dpkg -i dropbox*.deb
-            echo "dropbox start -i" >> $OUTPUT
+            print "dropbox start -i" >> $OUTPUT
         fi
         ### LibreOffice:
 		if hash libreoffice 2>/dev/null; then
@@ -140,7 +144,7 @@ for param in $@; do
         echo "nvidia-xconfig" >> $OUTPUT
 
     ############## CONFIGURATIONS ###############
-    elif [ "param" == "config" ]; then
+    elif [ "$param" == "config" ]; then
         sudo usermod -a -G sudo $UUSER
         if sudo grep "$UUSER ALL=(ALL:ALL) ALL" /etc/sudoers; then
             echo -e "${WARN} Sudoers already configured!${NC}"
@@ -176,7 +180,7 @@ for param in $@; do
     ############## JAVA ORACLE ###############
     ### How to Install JAVA 8 on Linux Systems ##
     ### Comandos retirados de: http://www.tecmint.com/install-java-jdk-jre-in-linux/
-    elif [ "param" == "java" ]; then
+    elif [ "$param" == "java" ]; then
         MACHINE_TYPE=`uname -m`
         if [ ${MACHINE_TYPE} == "x86_64" ]; then
             ARCH="x64"
@@ -237,7 +241,7 @@ for param in $@; do
     ############## OpenCV Sources ###############
     ### Baseado em http://www.pyimagesearch.com/2015/07/20/install-opencv-3-0-and-python-3-4-on-ubuntu/
     ## Exemplo modificado de: https://github.com/Tes3awy/OpenCV-3.1.0-Compiling-on-Raspberry-Pi-2-
-    elif [ "param" == "opencv" ]; then
+    elif [ "$param" == "opencv" ]; then
 		INSTALL_DIR="$UUSER_H/Downloads"
 		VERSION="3.1.0"
 		sudo apt-get update && sudo apt-get upgrade -y
@@ -260,8 +264,8 @@ for param in $@; do
 		#sudo dpkg -i zlib1g-dev_1.2.8.dfsg-2+b1_amd64.deb
 		
 		if [ ! -e libpng12* ]; then
-            wget http://ftp.br.debian.org/debian/pool/main/libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb 
-            wget http://ftp.br.debian.org/debian/pool/main/libp/libpng/libpng12-dev_1.2.50-2+deb8u3_amd64.deb
+	            wget http://ftp.br.debian.org/debian/pool/main/libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb 
+        	    wget http://ftp.br.debian.org/debian/pool/main/libp/libpng/libpng12-dev_1.2.50-2+deb8u3_amd64.deb
 		fi
 		chmod +x libpng12-0_1.2.50-2+deb8u3_amd64.deb libpng12-dev_1.2.50-2+deb8u3_amd64.deb
 		sudo dpkg -i libpng12-0_1.2.50-2+deb8u3_amd64.deb
@@ -289,7 +293,7 @@ for param in $@; do
 		#rm -rf build
 		mkdir -p build ; cd build
 		cmake -DENABLE_PRECOMPILED_HEADERS=OFF \
-            -DCMAKE_BUILD_TYPE=RELEASE \
+            		-DCMAKE_BUILD_TYPE=RELEASE \
 			-DCMAKE_INSTALL_PREFIX=/usr/local \
 			-DINSTALL_C_EXAMPLES=OFF \
 			-DINSTALL_PYTHON_EXAMPLES=ON \
@@ -325,13 +329,13 @@ for param in $@; do
         fi
 
     ############## REBOOT OR SHUTDOWN ###############
-    elif [ "param" == "poweroff" ]; then
+    elif [ "$param" == "poweroff" ]; then
         echo -e "${WARN} Shutdown in 10 seconds.\n Clean files...${NC}"
         sudo rm -rf opencv* get-pip.py libpng12* dropbox* teamviewer* google-chrome* draw.io* teste.py
         sudo apt autoremove --assume-yes
         sleep 10
         sudo shutdown now
-    elif [ "param" == "reboot" ]; then
+    elif [ "$param" == "reboot" ]; then
         echo -e "${WARN} Reboot in 10 seconds.\n Clean files...${NC}"
         sudo rm -rf opencv* get-pip.py libpng12* dropbox* teamviewer* google-chrome* draw.io* teste.py
         sudo apt autoremove --assume-yes
