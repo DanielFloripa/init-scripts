@@ -1,53 +1,31 @@
 #!/bin/bash
 
-# Script para backup via SSH usando o rsync
-# Versão 0.1http://organelas.com/2009/08/07/shell-script-para-backup-usando-rsync-e-ssh-em-dhcp-no-ubuntu/
+DEV1="/dev/sdb1"
+DEV2="/dev/sdc1"
 
-## Configuração!!! ##
-# Mude os parâmetros abaixo, referentes ao seu sistema
+DEF="/media/daniel/"
+DIR1=`sudo blkid $DEV1 | cut -d'"' -f2 | cut -d'"' -f1`
+DIR2=`sudo blkid $DEV2 | cut -d'"' -f2 | cut -d'"' -f1`
 
-# Destino:  IP ou hostname da máquina de destino
-ORIGEM1=("/dev/sdb1","/media/daniel/D7B3-DE22")
-ORIGEM2=("/home/daniel","/media/daniel/D7B3-DE22")
-DESTINO=("/dev/sdc1","/media/daniel/HD1500GB")
-# Arquivo log
-LOG=/home/arduino/Dropbox/UDESC/ProjPesq14/Pratico/GreenHop/.bkp_sync/.backup`date +%Y-%m-%d`.log
+SRC="$DEF$DIR1"
+DST="$DEF$DIR2"
 
-# Checar se a máquina de destino está ligada
-/bin/ping -c 1 -W 2 $DESTINO > /dev/null
-if [ "$?" -ne 0 ];
-then
-   echo -e `date +%c` >> $LOG
-   echo -e "\n$DESTINO desligado." >> $LOG
-   echo -e "Backup não realizado\n" >> $LOG
-   echo -e "--- // ---\n" >> $LOG
-   echo -e "\n$DESTINO desligado."
-   echo -e "Backup não realizado.\n"
+sudo mkdir -p $SRC
+sudo mkdir -p $DST
+
+#sudo mount $DEV1 $SRC
+#sudo mount $DEV2 $DST
+
+echo $SRC $DST
+#rsync -ah --stats --progress --log-file="log`date +%s`.log" $SRC/* $DST/
+sleep 2
+
+sudo umount $SRC
+sudo umount $DST
+if [ "$?" == '1' ]; then
+	echo "Deletando pastas"
+	sudo rm -rf $SRC $DST
 else
-   HORA_INI=`date +%s`
-   echo -e `date +%c` >> $LOG
-   echo -e "\n$DESTINO ligado!" >> $LOG
-   echo -e "Iniciando o backup...\n" >> $LOG
-   rsync -ah --delete --stats --progress --log-file=$LOG -e ssh $SRC$FDR1 $USR@$DESTINO:$DIR
-   rsync -ah --stats --progress --log-file=$LOG -e ssh $SRC$FDR2 $USR@$DESTINO:$INITD
-   HORA_FIM=`date +%s`
-   TEMPO=`expr $HORA_FIM - $HORA_INI`
-   echo -e "\nBackup finalizado com sucesso!" >> $LOG
-   echo -e "Duração: $TEMPO s\n" >> $LOG
-   echo -e "--- // ---\n" >> $LOG
-   echo -e "\nBackup finalizado com sucesso!"
-   echo -e "Duração: $TEMPO s\n"
-   echo -e "Consulte o log da operação em $LOG.\n"
+	echo "FALHA AO DESMONTAR. ERRO:" $?
 fi
-
-# TODO
-
-#       - Incluir em cron job!
-#       - Definir como lidar com o arquivo.log (deletar, arquivar, deixar...)
-#       - Incluir wakeonlan para ligar o computador se estiver desligado
-#       - Desligar máquina de destino após o término do backup
-#       - Criar alça para quando a transferência falhar (e.g.,falta de espaço)
-
-
-
 

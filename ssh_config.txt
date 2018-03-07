@@ -1,0 +1,16 @@
+sshd server:
+ sudo nano /etc/ssh/sshd_config 
+ TCPKeepAlive yes 
+ ClientAliveInterval 60 
+ ClientAliveCountMax 10000
+
+edit client side:
+ sudo nano /etc/ssh/ssh_config 
+ Host * 
+ ServerAliveInterval 100
+
+edit screen: 
+ sudo nano /etc/screenrc 
+ hardstatus alwayslastline 
+ hardstatus string "%{= kG}[ %{G}%H %{g}][ %{=kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B}%Y-%m-%d %{W}%c %{g}]" 
+ defscrollback 8192 

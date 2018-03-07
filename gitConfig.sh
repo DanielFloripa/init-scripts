@@ -7,7 +7,6 @@ if [ $# -eq 0 ]; then
 	echo "Falta parametro: $0 <repoName>"
 	exit 0
 fi
-
 git init
 git add *
 git commit -m "new"

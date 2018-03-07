@@ -1,57 +1,69 @@
 #!/bin/bash
 
-UUSER="$1"
+#Context:
+if [ "$0" == "bash" ]; then
+	USER="ubuntu"
+	ALL_PARAM=("config" "apt" "java")
+	APP="headless"
+	echo "Executing in server mode:" $USER ${ALL_PARAM[@]} $APP  
+else
+	ALL_PARAM=$@
+	UUSER="$1"
+	APP="dpkg"
+fi
+
+#Universal:
 UUSER_H="/home/$UUSER"
 OUTPUT="run_after.sh"
-APP="dpkg"
+CODENAME=`cat /etc/os-release | grep "VERSION=" | cut -d'(' -f2 | cut -d')' -f1 | cut -d' ' -f1`
+
 #Misc:
 WARN='\033[0;31m'
 NC='\033[0m' # No Color
 BLUE='\033[0;34m'
 
 if [ -e $OUTPUT ]; then
-	echo -e "${WARN} $0 already executed, whould you like to execute again? ${NC}[y/(N)]${NC}"
+	echo -e "${WARN} $0 ja foi executado, deseja reexecutar? {NC}[y/(N)]${NC}"
 	read resp
-	if [[ "$resp" == "n" ]]; then
+	if [[ "$resp" == "n" || "$resp" == "" ]]; then
         	exit 0;
 	else
         	OUTPUT=${OUTPUT%.*}"_"`date +%s`"."${OUTPUT##*.}
-		echo "Creating new $OUTPUT ..."
 		printf '#!/bin/bash\n' >> $OUTPUT
 	fi
 else
     printf '#!/bin/bash\n' >> $OUTPUT
 fi
-
 chmod +x $OUTPUT
 
-if [ $# == 0 ]; then
-	echo -e "${WARN} Parameters missing.\n Execute: $0 <username> <@args:{ config || apt || opencv || java || poweroff/reboot}>${NC}";
+if [ $# == 0 -a "$0" != "bash" ]; then
+	echo -e "${WARN} Parameters missing.
+	${BLUE}Execute: $0 <username> <@args>
+	{ config || apt || opencv || drivers || java || poweroff/reboot}>${NC}";
 	exit 0;
 fi
 
-for param in $@; do
-	echo "Executing: " $param
-    if [ "$param" == "apt" ]; then
+for param in ${ALL_PARAM[@]}; do
+	echo "Executing the" $param "parameter"
+    if [ "$param" == "apt" ]; then 
         sudo apt-get update
         sudo apt-get remove empathy akregator kmail kopete thunderbird pidgin hexchat banshee totem libreoffice-* unity-webapps-common apport --assume-yes
         sudo apt autoremove
         sudo apt-get -f install
         sudo apt-get upgrade --assume-yes
-        sudo apt-get install ftp curl git zip vim bash-completion aptitude htop --assume-yes
-	sudo apt-get install firmware-misc-nonfree --assume-yes
+        sudo apt-get install ftp curl git zip vim bash-completion aptitude htop firmware-misc-nonfree --assume-yes
         sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular --assume-yes 
-        sudo apt-get install geany gparted wine inkscape shutter filezilla dia vlc gnuplot --assume-yes
+        sudo apt-get install geany gparted wine inkscape shutter filezilla dia vlc gnuplot sqlite sqlitebrowser --assume-yes
         # @TODO:python-libs*
         sudo apt-get install python3 python-all python-pygame python-pil python-serial python-pip --assume-yes
         sudo apt autoremove --assume-yes
         ### R insync:
-        sudo apt-get install r-base r-base-dev insync --assume-yes
+        sudo apt-get install r-base r-base-dev rstudio insync --assume-yes
         echo "insync start" >> $OUTPUT
         ###TODO: zotero
         ### Draw.io:
         if hash draw.io 2>/dev/null; then
-            echo -e "${WARN} Draw.io already installed${NC}"
+            echo -e "${BLUE} Draw.io already installed${NC}"
         else
             if [ ! -e draw.io* ]; then
                 VERS=`curl -s https://github.com/jgraph/drawio-desktop/releases/latest | cut -d"v" -f2 | cut -d "\"" -f1`
@@ -61,36 +73,49 @@ for param in $@; do
             sudo dpkg -i draw.io*.deb
         fi
         ### FSLINT:
+#        if hash fslint-gui 2>/dev/null; then
+#            echo -e "${WARN} Fslint already installed${NC}"
+#        else
+#            sudo apt-get install debhelper python-glade2 --assume-yes
+#            VERS=`curl -s http://www.pixelbeat.org/fslint/ | grep devel | grep .deb | cut -d"-" -f2 | cut -d"<" -f1`
+#            if [ ! -e fslint* ]; then git clone https://github.com/pixelb/fslint.git fslint-$VERS; fi
+#            cd fslint*
+#            dpkg-buildpackage -I.git -rfakeroot -tc
+#            sudo dpkg -i ../fslint*.deb
+#        fi
+        ### FSLINT:
         if hash fslint-gui 2>/dev/null; then
-            echo -e "${WARN} Fslint already installed${NC}"
+            echo -e "${BLUE} Fslint already installed${NC}"
         else
             sudo apt-get install debhelper python-glade2 --assume-yes
-            VERS=`curl -s http://www.pixelbeat.org/fslint/ | grep devel | grep .deb | cut -d"-" -f2 | cut -d"<" -f1`
-            if [ ! -e fslint* ]; then git clone https://github.com/pixelb/fslint.git fslint-$VERS; fi
-            cd fslint*
+            if [ ! -e fslint* ]; then git clone https://github.com/pixelb/fslint.git; fi
+            cd fslint
             dpkg-buildpackage -I.git -rfakeroot -tc
             sudo dpkg -i ../fslint*.deb
+            cd ../
         fi
         ### Google Chrome:
         if  hash google-chrome 2>/dev/null; then
-            echo -e "${WARN} Chrome already installed${NC}"
+            echo -e "${BLUE} Chrome already installed${NC}"
         else
             sudo apt-get install libxss1 libappindicator1 libindicator7 --assume-yes 
-            if [ ! -e google-chrome*.deb ]; then wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb; fi
+            if [ ! -e google-chrome*.deb ]; then 
+				wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb; 
+			fi
             chmod +x google-chrome-stable_current_amd64.deb 
             sudo dpkg -i google-chrome-stable_current_amd64.deb 
             echo "google-chrome" >> $OUTPUT
         fi
         ### Youtube-DL:
         if hash youtube-dl 2>/dev/null; then
-            echo -e "${WARN} yt-dl already installed${NC}"
+            echo -e "${BLUE} yt-dl already installed${NC}"
         else
             sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/bin/youtube-dl
             sudo chmod a+rx /usr/bin/youtube-dl
         fi
         ### Teamviewer
         if hash teamviewer 2>/dev/null; then 
-            echo -e "${WARN} Teamviwer already installed${NC}"
+            echo -e "${BLUE} Teamviwer already installed${NC}"
         else
             sudo dpkg --add-architecture i386
             sudo apt-install libc6 libgcc1 libasound2 libdbus-1-3 libexpat1 libfontconfig1 libfreetype6 libjpeg62 libsm6 libxdamage1 libxext6 libxfixes3 libxinerama1 libxrandr2 libxrender1 libxtst6 zlib1g --assume-yes
@@ -103,7 +128,7 @@ for param in $@; do
         fi
         ### Dropbox
         if hash dropbox 2>/dev/null; then 
-            echo -e "${WARN} Dropbox already installed${NC}"
+            echo -e "${BLUE} Dropbox already installed${NC}"
         elif [ "$APP" == "headless" ]; then
             DBOX_F="$UUSER_H/.dropbox-dist/"
             cd $UUSER_H && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
@@ -117,11 +142,11 @@ for param in $@; do
             fi
             chmod +x dropbox* 
             sudo dpkg -i dropbox*.deb
-            print "dropbox start -i" >> $OUTPUT
+            echo "dropbox start -i" >> $OUTPUT
         fi
         ### LibreOffice:
 		if hash libreoffice 2>/dev/null; then
-			echo -e "${WARN} Libreoffice already installed.${NC}"
+			echo -e "${BLUE} Libreoffice already installed.${NC}"
 		else
 			VERS="5.4.1"
 			FILEBASE="LibreOffice_${VERS}_Linux_x86-64_deb"
@@ -137,6 +162,48 @@ for param in $@; do
 			sudo dpkg -i loffice/*/DEBS/*
 			sudo dpkg -i loffice-lp/*/DEBS/*
 		fi
+		#
+		### Sublime ###
+		if hash subl 2>/dev/null; then
+			echo -e "${BLUE} Sublime already installed.${NC}"
+		else
+			if [ ! -e sublimehq-pub.gpg ]; then
+				wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
+			sudo apt-get install -y apt-transport-https
+			if sudo grep "sublimetext" /etc/apt/sources.list; then
+				echo -e "${BLUE} Sublime sources already configured!${NC}"
+			else
+				sudo apt-get install dirmngr --assume-yes
+				sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
+				echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
+			fi			
+			sudo apt-get update
+			sudo apt-get install -y sublime-text
+		#
+		### Virtual Box
+		wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+		#add to /etc/apt/sources.list:
+		echo "deb http://download.virtualbox.org/virtualbox/debian $CODENAME contrib" >> /etc/apt/sources.list
+		sudo apt-get update
+		sudo apt-get install -y dkms
+		sudo apt-get install -y virtualbox-5.1
+		wget http://download.virtualbox.org/virtualbox/5.1.28/Oracle_VM_VirtualBox_Extension_Pack-5.1.28-117968.vbox-extpack
+		
+		
+		### lamp stack:
+		#sudo ./lamp.sh "abcde"
+				
+		### NodeJS NPM:
+		curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+		sudo apt-get install -y nodejs
+		sudo apt-get install -y build-essential
+		curl -L https://www.npmjs.com/install.sh | sudo -E bash -
+		
+		### iphone drivers
+		bash iphone.sh install
+
+	############## Video Drivers ###############
+	elif [ "@param" == "drivers" ]; then
         ### Nvidia Drivers:
         sudo aptitude update
         sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia-legacy-340xx-driver
@@ -147,7 +214,7 @@ for param in $@; do
     elif [ "$param" == "config" ]; then
         sudo usermod -a -G sudo $UUSER
         if sudo grep "$UUSER ALL=(ALL:ALL) ALL" /etc/sudoers; then
-            echo -e "${WARN} Sudoers already configured!${NC}"
+            echo -e "${BLUE} Sudoers already configured!${NC}"
         else
             echo "$UUSER ALL=(ALL:ALL) ALL" | sudo tee --append /etc/sudoers
         fi
@@ -156,13 +223,13 @@ for param in $@; do
         sudo sed -e "s/^HISTFILESIZE.*$/HISTFILESIZE=-1/" -i $UUSER_H/.bashrc
         ### NON-Free repo:
         if sudo grep non-free /etc/apt/sources.list; then
-            echo -e "${WARN} Non-free sources already configured!${NC}"
+            echo -e "${BLUE} Non-free sources already configured!${NC}"
         else
             echo "deb http://httpredir.debian.org/debian/ stretch main contrib non-free" | sudo tee --append /etc/apt/sources.list > /dev/null
         fi
         ### Cran-R:
         if sudo grep "cran-r" /etc/apt/sources.list; then
-            echo -e "${WARN} R sources already configured!${NC}"
+            echo -e "${BLUE} R sources already configured!${NC}"
         else
             sudo apt-get install dirmngr --assume-yes
             sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
@@ -170,7 +237,7 @@ for param in $@; do
         fi
         ### Insync:
         if sudo grep "insynchq" /etc/apt/sources.list; then
-            echo -e "${WARN} Insync sources already configured!${NC}"
+            echo -e "${BLUE} Insync sources already configured!${NC}"
         else
             wget -qO - https://d2t3ff60b2tol4.cloudfront.net/services@insynchq.com.gpg.key \ | sudo apt-key add -
             echo "deb http://apt.insynchq.com/debian stretch non-free" | sudo tee --append /etc/apt/sources.list > /dev/null
@@ -202,7 +269,7 @@ for param in $@; do
         #3. Now it’s time to download Java (JDK) source tarball files for your system architecture by going to official Java download page. 
         #You may use wget command to download files directly into the /opt/java directory as shown below.
         if [ -f $UUSER_H/Downloads/jdk* ]; then
-            echo -e "${WARN} File: $FILE already exists${NC}"
+            echo -e "${BLUE} File: $FILE already exists${NC}"
             cp -v $UUSER_H/Downloads/jdk* /opt/java;
         else
             wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/${VERSION}-${SUBVERSION}/$FILE"
@@ -228,7 +295,7 @@ for param in $@; do
         echo "#Versao nova Java: " >> $OUTPUT
         echo "java -version" >> $OUTPUT
         #Suggested: If you are not using OpenJDK, you may remove it as:
-        echo -e "${WARN} Removing old openjdk...${NC}"
+        echo -e "${BLUE} Removing old openjdk...${NC}"
         sudo apt-get remove openjdk-*
         #10. To enable Java 8 JDK 8u45 Support in Firefox, you need to run following commands to enable Java module for Firefox.
         #On Debian, Ubuntu and Mint
@@ -264,8 +331,8 @@ for param in $@; do
 		#sudo dpkg -i zlib1g-dev_1.2.8.dfsg-2+b1_amd64.deb
 		
 		if [ ! -e libpng12* ]; then
-	            wget http://ftp.br.debian.org/debian/pool/main/libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb 
-        	    wget http://ftp.br.debian.org/debian/pool/main/libp/libpng/libpng12-dev_1.2.50-2+deb8u3_amd64.deb
+            wget http://ftp.br.debian.org/debian/pool/main/libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb 
+            wget http://ftp.br.debian.org/debian/pool/main/libp/libpng/libpng12-dev_1.2.50-2+deb8u3_amd64.deb
 		fi
 		chmod +x libpng12-0_1.2.50-2+deb8u3_amd64.deb libpng12-dev_1.2.50-2+deb8u3_amd64.deb
 		sudo dpkg -i libpng12-0_1.2.50-2+deb8u3_amd64.deb
@@ -293,7 +360,7 @@ for param in $@; do
 		#rm -rf build
 		mkdir -p build ; cd build
 		cmake -DENABLE_PRECOMPILED_HEADERS=OFF \
-            		-DCMAKE_BUILD_TYPE=RELEASE \
+            -DCMAKE_BUILD_TYPE=RELEASE \
 			-DCMAKE_INSTALL_PREFIX=/usr/local \
 			-DINSTALL_C_EXAMPLES=OFF \
 			-DINSTALL_PYTHON_EXAMPLES=ON \
@@ -330,16 +397,21 @@ for param in $@; do
 
     ############## REBOOT OR SHUTDOWN ###############
     elif [ "$param" == "poweroff" ]; then
-        echo -e "${WARN} Shutdown in 10 seconds.\n Clean files...${NC}"
+        echo -e "${BLUE} Shutdown in 10 seconds.\n Clean files...${NC}"
         sudo rm -rf opencv* get-pip.py libpng12* dropbox* teamviewer* google-chrome* draw.io* teste.py
         sudo apt autoremove --assume-yes
         sleep 10
         sudo shutdown now
     elif [ "$param" == "reboot" ]; then
-        echo -e "${WARN} Reboot in 10 seconds.\n Clean files...${NC}"
+        echo -e "${BLUE} Reboot in 10 seconds.\n Clean files...${NC}"
         sudo rm -rf opencv* get-pip.py libpng12* dropbox* teamviewer* google-chrome* draw.io* teste.py
         sudo apt autoremove --assume-yes
         sleep 10
         sudo shutdown -r now
     fi
 done
+
+#TODO:
+#sudo apt-get purge --auto-remove gnome-online-accounts
+#install aws-cli openstack-cli
+
