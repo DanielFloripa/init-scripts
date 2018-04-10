@@ -21,6 +21,11 @@
 ###-> That should give you the resolution you want for the T.V.
 ###-> To keep the settings after restart use the answer here with your settings and you won't have to redo them
 
-sudo xrandr --newmode "1368x768_60.00"   85.25  1368 1440 1576 1784  768 771 781 798 -hsync +vsync
+
+res=`sudo cvt 1366 768 | grep Modeline | cut -d'"' -f2,3`
+param=`echo \"${res}`
+echo $param
+
+sudo xrandr --newmode "1368x768_60.00" 85.25 1368 1440 1576 1784 768 771 781 798 -hsync +vsync
 sudo xrandr --addmode VGA-0 1368x768_60.00
 

@@ -1,15 +1,5 @@
 #!/bin/bash
-#  Licensed under the Apache License, Version 2.0 (the "License"); you may
-#  not use this file except in compliance with the License. You may obtain
-#  a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#  License for the specific language governing permissions and limitations
-#  under the License.
+
 
 SERVER='localhost'
 DB_NAME="$1"
@@ -18,37 +8,34 @@ DB_PASS="$3"
 
 #install requirements
 
-#sudo apt-get update && sudo apt-get upgrade -y
-#sudo apt-get -y install build-essential snmp vim libssh2-1-dev libssh2-1
+sudo apt-get update && sudo apt-get upgrade -y
 
-## Mysql server
+# Mysql server
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password root'
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password root'
 
-sudo apt-get -y install --reinstall mysql-server 
+sudo apt-get -y install mysql-server
 
-## php5, apache2
-#sudo apt-get -y install apache2 php5 php5-mysql #subversion 
-#sudoapt-get install -y libapache2-mod-php5 php5-gd php-net-socket libpq5 libpq-dev mysql-server mysql-client libmysqld-dev
+# php5, apache2
+sudo apt-get -y install apache2 php5 php5-mysql #subversion 
 
-# Zabbix Server
+## Zabbix Server:
 #sudo apt-get -y install zabbix-server-mysql php5-mysql zabbix-frontend-php
-# or:
+## or:
 #svn co svn://svn.zabbix.com/trunk
 #cd /trunk
-#or:
-
+## or:
 rm -rf zabbix-*
 URL_LATEST=`curl -s https://sourceforge.net/projects/zabbix/files/latest/download?source=files | grep -P "<a href=" | awk -F'[\"]' '{print $2}' | awk -F'[?]' '{print $1}'`
 wget $URL_LATEST
 tar -zxvf zabbix-*
 cd zabbix-*
 
-sudo groupadd zabbix
-sudo useradd -g zabbix zabbix
+groupadd zabbix
+useradd -g zabbix zabbix
 
-sudo ./configure --enable-server --enable-agent --with-mysql --enable-ipv6 --with-net-snmp --with-libcurl #--with-libxml2
-sudo make install
+./configure --enable-server --enable-agent --with-mysql --enable-ipv6 --with-net-snmp --with-libcurl --with-libxml2
+make install
 
 # Configure installation
 
@@ -85,5 +72,5 @@ sudo a2enmod alias
 sudo service apache2 restart
 
 sudo sed -e "s/^START=no/START=yes/" -i /etc/default/zabbix-server
-sudo iptables -I INPUT 1 -p tcp -m tcp --dport 10051 -j ACCEPT -m comment --comment "by murano, Zabbix"
+sudo iptables -I INPUT 1 -p tcp -m tcp --dport 10051 -j ACCEPT -m comment --comment "Zabbix"
 service zabbix-server restart
