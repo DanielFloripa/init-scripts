@@ -2,7 +2,7 @@
 
 #Context:
 if [ "$0" == "bash" ]; then
-	USER="ubuntu"
+	USER="debian" # "ubuntu"
 	ALL_PARAM=("config" "apt" "java")
 	APP="headless"
 	echo "Executing in server mode:" $USER ${ALL_PARAM[@]} $APP  
@@ -105,7 +105,7 @@ for param in ${ALL_PARAM[@]}; do
 			echo -e "${BLUE} Teamviwer already installed${NC}"
 		else
 			sudo dpkg --add-architecture i386
-			sudo apt-install libc6 libgcc1 libasound2 libdbus-1-3 libexpat1 libfontconfig1 libfreetype6 libjpeg62 libsm6 libxdamage1 libxext6 libxfixes3 libxinerama1 libxrandr2 libxrender1 libxtst6 zlib1g --assume-yes
+			sudo apt-get install libc6 libgcc1 libasound2 libdbus-1-3 libexpat1 libfontconfig1 libfreetype6 libjpeg62 libsm6 libxdamage1 libxext6 libxfixes3 libxinerama1 libxrandr2 libxrender1 libxtst6 zlib1g --assume-yes
 			sudo apt --fix-broken install
 			if [ ! -e teamviewer_i386.deb ]; then wget https://download.teamviewer.com/download/teamviewer_i386.deb; fi
 			sudo dpkg -i teamviewer_i386.deb 
@@ -187,7 +187,8 @@ for param in ${ALL_PARAM[@]}; do
 		sudo apt-get install -y build-essential
 		curl -L https://www.npmjs.com/install.sh | sudo -E bash -
 		### iphone drivers
-		bash iphone.sh install
+		
+		if [ "$APP" == "dpkg" ]; then bash iphone.sh install; fi
 	############## Video Drivers ###############
 	elif [ "$param" == "drivers" ]; then
 		### Nvidia Drivers:
