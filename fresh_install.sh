@@ -23,7 +23,6 @@ WARN='\033[0;31m'
 NC='\033[0m' # No Color
 BLUE='\033[0;34m'
 
-
 if [ $# == 0 -a "$0" != "bash" ]; then
 	echo -e "${WARN} Parameters missing.
 	${BLUE}Execute: $0 <username> <@args>
@@ -155,10 +154,13 @@ for param in ${ALL_PARAM[@]}; do
 		if hash subl 2>/dev/null; then
 			echo -e "${BLUE} Sublime already installed.${NC}"
 		else
+			echo -e "Installling sublime"
 			if [ ! -e sublimehq-pub.gpg ]; then
-				wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
+				wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
+				#sudo apt-key add -wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg
+			fi
 			sudo apt-get install -y apt-transport-https
-			if sudo grep "sublimetext" /etc/apt/sources.list; then
+			if sudo grep "sublimetext" /etc/apt/sources.list>/dev/null; then
 				echo -e "${BLUE} Sublime sources already configured!${NC}"
 			else
 				sudo apt-get install dirmngr --assume-yes
@@ -167,6 +169,7 @@ for param in ${ALL_PARAM[@]}; do
 			fi			
 			sudo apt-get update
 			sudo apt-get install -y sublime-text
+		fi
 		#
 		### Virtual Box
 		wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
@@ -176,28 +179,22 @@ for param in ${ALL_PARAM[@]}; do
 		sudo apt-get install -y dkms
 		sudo apt-get install -y virtualbox-5.1
 		wget http://download.virtualbox.org/virtualbox/5.1.28/Oracle_VM_VirtualBox_Extension_Pack-5.1.28-117968.vbox-extpack
-		
-		
 		### lamp stack:
 		#sudo ./lamp.sh "abcde"
-				
 		### NodeJS NPM:
 		curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 		sudo apt-get install -y nodejs
 		sudo apt-get install -y build-essential
 		curl -L https://www.npmjs.com/install.sh | sudo -E bash -
-		
 		### iphone drivers
 		bash iphone.sh install
-
 	############## Video Drivers ###############
-	elif [ "@param" == "drivers" ]; then
+	elif [ "$param" == "drivers" ]; then
 		### Nvidia Drivers:
 		sudo aptitude update
 		sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia-legacy-340xx-driver
 		sudo aptitude -r install nvidia-xconfig
 		echo "nvidia-xconfig" >> $OUTPUT
-
 	############## CONFIGURATIONS ###############
 	elif [ "$param" == "config" ]; then
 		sudo usermod -a -G sudo $UUSER
@@ -382,6 +379,7 @@ for param in ${ALL_PARAM[@]}; do
 		else
 			echo -e "${WARN} Houve algum erro, reinicie a instalacao!!!${NC}"
 		fi
+
 	############## REBOOT OR SHUTDOWN ###############
 	elif [ "$param" == "poweroff" ]; then
 		echo -e "${BLUE} Shutdown in 10 seconds.\n Clean files...${NC}"
