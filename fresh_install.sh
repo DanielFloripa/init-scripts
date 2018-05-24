@@ -45,7 +45,7 @@ for param in ${ALL_PARAM[@]}; do
 		sudo apt-get install python3 python-all python-pygame python-pil python-serial python-pip --assume-yes
 		sudo apt autoremove --assume-yes
 		### R insync:
-		sudo apt-get install r-base r-base-dev rstudio insync --assume-yes
+		sudo apt-get install r-base r-base-dev insync --assume-yes
 		echo "insync start" >> $OUTPUT
 		###TODO: zotero
 		### Draw.io:
@@ -193,7 +193,7 @@ for param in ${ALL_PARAM[@]}; do
 	elif [ "$param" == "drivers" ]; then
 		### Nvidia Drivers:
 		sudo aptitude update
-		sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia-legacy-340xx-driver
+sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia-legacy-340xx-driver
 		sudo aptitude -r install nvidia-xconfig
 		echo "nvidia-xconfig" >> $OUTPUT
 	############## CONFIGURATIONS ###############
@@ -220,6 +220,11 @@ for param in ${ALL_PARAM[@]}; do
 			sudo apt-get install dirmngr --assume-yes
 			sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
 			echo "deb http://cran-r.c3sl.ufpr.br/bin/linux/$OS_NAME stretch-cran34/" | sudo tee --append /etc/apt/sources.list > /dev/null
+			#sudo apt-get install r-base r-base-dev
+			wget https://download1.rstudio.org/rstudio-xenial-1.1.447-amd64.deb
+			sudo chmod +x rstudio-xenial-1.1.447-amd64.deb
+			sudo dpkg -i rstudio-xenial-1.1.447-amd64.deb
+			rm -rf rstudio-xenial-1.1.447-amd64.deb
 		fi
 		### Insync:
 		if sudo grep "insynchq" /etc/apt/sources.list; then
@@ -401,3 +406,4 @@ done
 #sudo apt-get purge --auto-remove gnome-online-accounts
 #install aws-cli openstack-cli
 
+#https://docs.docker.com/install/linux/docker-ce/debian/#uninstall-docker-ce
