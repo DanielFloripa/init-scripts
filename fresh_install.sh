@@ -34,17 +34,18 @@ for param in ${ALL_PARAM[@]}; do
 	echo "Executing the" $param "parameter"
 	if [ "$param" == "apt" ]; then 
 		sudo apt-get update
-		sudo apt-get remove empathy akregator kmail kopete thunderbird pidgin hexchat banshee totem libreoffice-* unity-webapps-common apport --assume-yes
+		sudo apt-get remove empathy akregator kmail kopete thunderbird pidgin hexchat banshee totem unity-webapps-common apport --assume-yes
 		sudo apt autoremove
 		sudo apt-get -f install
 		sudo apt-get upgrade --assume-yes
 		sudo apt-get install ftp curl git zip vim bash-completion aptitude htop firmware-misc-nonfree --assume-yes
-		sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular --assume-yes 
+		#sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular --assume-yes 
 		sudo apt-get install geany gparted wine inkscape shutter filezilla dia vlc gnuplot sqlite sqlitebrowser --assume-yes
 		# @TODO:python-libs*
-		sudo apt-get install python3 python-all python-pygame python-pil python-serial python-pip --assume-yes
+		sudo apt-get install  python-all python-pygame python-pil python-serial python-pip python3 python3-all python3-pip --assume-yes
+		sudo bash python_latest_instal.sh
 		sudo apt autoremove --assume-yes
-		### R insync:
+		### R e insync:
 		sudo apt-get install r-base r-base-dev insync --assume-yes
 		echo "insync start" >> $OUTPUT
 		###TODO: zotero
@@ -101,9 +102,10 @@ for param in ${ALL_PARAM[@]}; do
 			sudo chmod a+rx /usr/bin/youtube-dl
 		fi
 		### Teamviewer
+		TV_VER="NEW"
 		if hash teamviewer 2>/dev/null; then 
 			echo -e "${BLUE} Teamviwer already installed${NC}"
-		else
+		elif [ "${TV_VER}" == "OLD" ]; then
 			sudo dpkg --add-architecture i386
 			sudo apt-get install libc6 libgcc1 libasound2 libdbus-1-3 libexpat1 libfontconfig1 libfreetype6 libjpeg62 libsm6 libxdamage1 libxext6 libxfixes3 libxinerama1 libxrandr2 libxrender1 libxtst6 zlib1g --assume-yes
 			sudo apt --fix-broken install
@@ -112,6 +114,14 @@ for param in ${ALL_PARAM[@]}; do
 			sudo apt-get install -f
 			echo "teamviewer" >> $OUTPUT
 			sudo dpkg --add-architecture amd64
+		else
+			if [ ! -e teamviewer_amd64.deb ]; then
+				wget https://download.teamviewer.com/download/linux/teamviewer_amd64.deb
+			fi
+			chmod +x teamviewer_amd64.deb
+			sudo dpkg -i teamviewer_amd64.deb
+			sudo apt-get install -f
+			echo "teamviewer" >> $OUTPUT
 		fi
 		### Dropbox
 		if hash dropbox 2>/dev/null; then 
@@ -173,22 +183,26 @@ for param in ${ALL_PARAM[@]}; do
 		#
 		### Virtual Box
 		wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
-		#add to /etc/apt/sources.list:
+		"add to /etc/apt/sources.list:"
 		echo "deb http://download.virtualbox.org/virtualbox/$OS_NAME $CODENAME contrib" >> /etc/apt/sources.list
 		sudo apt-get update
 		sudo apt-get install -y dkms
-		sudo apt-get install -y virtualbox-5.1
-		wget http://download.virtualbox.org/virtualbox/5.1.28/Oracle_VM_VirtualBox_Extension_Pack-5.1.28-117968.vbox-extpack
+		#sudo apt-get install -y virtualbox-5.1
+		#wget http://download.virtualbox.org/virtualbox/5.1.28/Oracle_VM_VirtualBox_Extension_Pack-5.1.28-117968.vbox-extpack
 		### lamp stack:
 		#sudo ./lamp.sh "abcde"
-		### NodeJS NPM:
+		""" NodeJS NPM:"""
 		curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 		sudo apt-get install -y nodejs
 		sudo apt-get install -y build-essential
 		curl -L https://www.npmjs.com/install.sh | sudo -E bash -
 		### iphone drivers
 		
-		if [ "$APP" == "dpkg" ]; then bash iphone.sh install; fi
+		if [ "$APP" == "dpkg" ]; then 
+			bash iphone.sh install
+		fi
+		
+
 	############## Video Drivers ###############
 	elif [ "$param" == "drivers" ]; then
 		### Nvidia Drivers:
@@ -196,6 +210,8 @@ for param in ${ALL_PARAM[@]}; do
 sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia-legacy-340xx-driver
 		sudo aptitude -r install nvidia-xconfig
 		echo "nvidia-xconfig" >> $OUTPUT
+
+
 	############## CONFIGURATIONS ###############
 	elif [ "$param" == "config" ]; then
 		sudo usermod -a -G sudo $UUSER
@@ -204,6 +220,7 @@ sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia
 		else
 			echo "$UUSER ALL=(ALL:ALL) ALL" | sudo tee --append /etc/sudoers
 		fi
+		sudo adduser daniel --add_extra_groups sudo
 		### BASH history to infinity:
 		sudo sed -e "s/^HISTSIZE.*$/HISTSIZE=-1/" -i $UUSER_H/.bashrc
 		sudo sed -e "s/^HISTFILESIZE.*$/HISTFILESIZE=-1/" -i $UUSER_H/.bashrc
