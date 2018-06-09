@@ -46,7 +46,14 @@ for param in ${ALL_PARAM[@]}; do
 		sudo bash python_latest_instal.sh
 		sudo apt autoremove --assume-yes
 		### R e insync:
-		sudo apt-get install r-base r-base-dev insync --assume-yes
+		sudo apt-get install r-base r-base-dev --allow-unauthenticated  --assume-yes
+
+		wget https://download1.rstudio.org/rstudio-xenial-1.1.447-amd64.deb
+		sudo chmod +x rstudio-xenial-1.1.447-amd64.deb
+		sudo dpkg -i rstudio-xenial-1.1.447-amd64.deb
+		#rm -rf rstudio-xenial-1.1.447-amd64.deb
+		
+		sudo apt install insync --assume-yes
 		echo "insync start" >> $OUTPUT
 		###TODO: zotero
 		### Draw.io:
@@ -120,8 +127,16 @@ for param in ${ALL_PARAM[@]}; do
 			fi
 			chmod +x teamviewer_amd64.deb
 			sudo dpkg -i teamviewer_amd64.deb
-			sudo apt-get install -f
+			sudo apt-get -f install
 			echo "teamviewer" >> $OUTPUT
+		fi
+		#### AnyDesk  #####
+		if hash anydesk 2>/dev/null; then 
+			echo -e "${BLUE} AnyDesk already installed${NC}"
+		else
+			wget https://download.anydesk.com/linux/anydesk_2.9.5-1_amd64.deb
+			sudo dpkg -i anydesk_2.9.5-1_amd64.deb
+			sudo apt -f install
 		fi
 		### Dropbox
 		if hash dropbox 2>/dev/null; then 
@@ -137,15 +152,17 @@ for param in ${ALL_PARAM[@]}; do
 			if [ ! -e dropbox*.deb ]; then 
 				wget https://linux.dropbox.com/packages/$OS_NAME/dropbox_2015.10.28_amd64.deb
 			fi
+			sudo apt -f install 
 			chmod +x dropbox* 
 			sudo dpkg -i dropbox*.deb
+			sudo apt -f install
 			echo "dropbox start -i" >> $OUTPUT
 		fi
 		### LibreOffice:
 		if hash libreoffice 2>/dev/null; then
 			echo -e "${BLUE} Libreoffice already installed.${NC}"
 		else
-			VERS="5.4.1"
+			VERS="6.0.4"
 			FILEBASE="LibreOffice_${VERS}_Linux_x86-64_deb"
 			if [ ! -e libreoffice*.tar.gz ]; then
 				wget http://download.documentfoundation.org/libreoffice/stable/${VERS}/deb/x86_64/${FILEBASE}.tar.gz
@@ -188,7 +205,7 @@ for param in ${ALL_PARAM[@]}; do
 		sudo apt-get update
 		sudo apt-get install -y dkms
 		#sudo apt-get install -y virtualbox-5.1
-		#wget http://download.virtualbox.org/virtualbox/5.1.28/Oracle_VM_VirtualBox_Extension_Pack-5.1.28-117968.vbox-extpack
+		#wget http://download.virtualbox.org/\virtualbox/5.1.28/Oracle_VM_VirtualBox_Extension_Pack-5.1.28-117968.vbox-extpack
 		### lamp stack:
 		#sudo ./lamp.sh "abcde"
 		""" NodeJS NPM:"""
@@ -237,11 +254,6 @@ sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia
 			sudo apt-get install dirmngr --assume-yes
 			sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
 			echo "deb http://cran-r.c3sl.ufpr.br/bin/linux/$OS_NAME stretch-cran34/" | sudo tee --append /etc/apt/sources.list > /dev/null
-			#sudo apt-get install r-base r-base-dev
-			wget https://download1.rstudio.org/rstudio-xenial-1.1.447-amd64.deb
-			sudo chmod +x rstudio-xenial-1.1.447-amd64.deb
-			sudo dpkg -i rstudio-xenial-1.1.447-amd64.deb
-			rm -rf rstudio-xenial-1.1.447-amd64.deb
 		fi
 		### Insync:
 		if sudo grep "insynchq" /etc/apt/sources.list; then
