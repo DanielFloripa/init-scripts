@@ -6,10 +6,12 @@ if [ "$0" == "bash" ]; then
 	ALL_PARAM=("config" "apt" "java")
 	APP="headless"
 	echo "Executing in server mode:" $USER ${ALL_PARAM[@]} $APP  
+	LEVEL=0
 else
 	ALL_PARAM=$@
 	UUSER="$1"
 	APP="dpkg"
+	LEVEL=1
 fi
 
 #Universal:
@@ -186,10 +188,11 @@ for param in ${ALL_PARAM[@]}; do
 				wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
 				#sudo apt-key add -wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg
 			fi
-			sudo apt-get install -y apt-transport-https
-			if sudo grep "sublimetext" /etc/apt/sources.list>/dev/null; then
+			
+			if sudo grep "sublimetext" /etc/apt/sources.list > /dev/null; then
 				echo -e "${BLUE} Sublime sources already configured!${NC}"
 			else
+				sudo apt-get install -y apt-transport-https
 				sudo apt-get install dirmngr --assume-yes
 				sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
 				echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
@@ -200,7 +203,7 @@ for param in ${ALL_PARAM[@]}; do
 		#
 		### Virtual Box
 		wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
-		"add to /etc/apt/sources.list:"
+		#"add to /etc/apt/sources.list:"
 		echo "deb http://download.virtualbox.org/virtualbox/$OS_NAME $CODENAME contrib" >> /etc/apt/sources.list
 		sudo apt-get update
 		sudo apt-get install -y dkms
@@ -208,7 +211,8 @@ for param in ${ALL_PARAM[@]}; do
 		#wget http://download.virtualbox.org/\virtualbox/5.1.28/Oracle_VM_VirtualBox_Extension_Pack-5.1.28-117968.vbox-extpack
 		### lamp stack:
 		#sudo ./lamp.sh "abcde"
-		""" NodeJS NPM:"""
+		#""" NodeJS NPM:"""
+		sudo apt-get install -y nodejs
 		curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 		sudo apt-get install -y nodejs
 		sudo apt-get install -y build-essential
@@ -216,19 +220,23 @@ for param in ${ALL_PARAM[@]}; do
 		### iphone drivers
 		
 		if [ "$APP" == "dpkg" ]; then 
-			bash iphone.sh install
+			#bash iphone.sh install
 		fi
+	
+	elif [ "$param" == "pip" ]; then
+		sudo pip install --upgrade pip
+		sudo pip3 install --upgrade pip
+		sudo pip install awscli
+		sudo pip install python-openstackclient
 		
-
 	############## Video Drivers ###############
 	elif [ "$param" == "drivers" ]; then
 		### Nvidia Drivers:
 		sudo aptitude update
-sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia-legacy-340xx-driver
+		sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia-legacy-340xx-driver
 		sudo aptitude -r install nvidia-xconfig
 		echo "nvidia-xconfig" >> $OUTPUT
-
-
+		
 	############## CONFIGURATIONS ###############
 	elif [ "$param" == "config" ]; then
 		sudo usermod -a -G sudo $UUSER
@@ -252,7 +260,8 @@ sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia
 			echo -e "${BLUE} R sources already configured!${NC}"
 		else
 			sudo apt-get install dirmngr --assume-yes
-			sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
+			sudo apt-key adv --keyserver keys.gnupg.net --recv-key 6212B7B7931C4BB16280BA1306F90DE5381BA480
+			# sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
 			echo "deb http://cran-r.c3sl.ufpr.br/bin/linux/$OS_NAME stretch-cran34/" | sudo tee --append /etc/apt/sources.list > /dev/null
 		fi
 		### Insync:
