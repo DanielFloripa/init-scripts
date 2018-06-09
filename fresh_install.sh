@@ -41,7 +41,7 @@ for param in ${ALL_PARAM[@]}; do
 		sudo apt-get -f install
 		sudo apt-get upgrade --assume-yes
 		sudo apt-get install ftp curl git zip vim bash-completion aptitude htop firmware-misc-nonfree --assume-yes
-		if [ $LEVEL -e 1 ]; then 
+		if [ $LEVEL > 1 ]; then 
 			sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular --assume-yes
 		fi
 		sudo apt-get install geany gparted wine inkscape shutter filezilla dia vlc gnuplot sqlite sqlitebrowser --assume-yes
@@ -209,8 +209,8 @@ for param in ${ALL_PARAM[@]}; do
 		curl -L https://www.npmjs.com/install.sh | sudo -E bash -
 		### iphone drivers
 		
-		if [ "$APP" == "dpkg" ]; then 
-			#bash iphone.sh install
+		if [ $LEVEL > 2 ]; then 
+			bash iphone.sh install
 		fi
 	
 	elif [ "$param" == "pip" ]; then
