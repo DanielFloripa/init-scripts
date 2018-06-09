@@ -41,7 +41,9 @@ for param in ${ALL_PARAM[@]}; do
 		sudo apt-get -f install
 		sudo apt-get upgrade --assume-yes
 		sudo apt-get install ftp curl git zip vim bash-completion aptitude htop firmware-misc-nonfree --assume-yes
-		#sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular --assume-yes 
+		if [ $LEVEL -e 1 ]; then 
+			sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular --assume-yes
+		fi
 		sudo apt-get install geany gparted wine inkscape shutter filezilla dia vlc gnuplot sqlite sqlitebrowser --assume-yes
 		# @TODO:python-libs*
 		sudo apt-get install  python-all python-pygame python-pil python-serial python-pip python3 python3-all python3-pip --assume-yes
@@ -69,18 +71,6 @@ for param in ${ALL_PARAM[@]}; do
 			chmod +x draw.io*.deb
 			sudo dpkg -i draw.io*.deb
 		fi
-		### FSLINT:
-#		if hash fslint-gui 2>/dev/null; then
-#			echo -e "${WARN} Fslint already installed${NC}"
-#		else
-#			sudo apt-get install debhelper python-glade2 --assume-yes
-#			VERS=`curl -s http://www.pixelbeat.org/fslint/ | grep devel | grep .deb | cut -d"-" -f2 | cut -d"<" -f1`
-#			if [ ! -e fslint* ]; then git clone https://github.com/pixelb/fslint.git fslint-$VERS; fi
-#			cd fslint*
-#			dpkg-buildpackage -I.git -rfakeroot -tc
-#			sudo dpkg -i ../fslint*.deb
-#		fi
-		### FSLINT:
 		if hash fslint-gui 2>/dev/null; then
 			echo -e "${BLUE} Fslint already installed${NC}"
 		else
