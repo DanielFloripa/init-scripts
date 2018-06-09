@@ -14,6 +14,11 @@ else
 	LEVEL=1
 fi
 
+if [ "$EUID" -ne 0 ]; then
+	echo "Please run as root"
+	exit
+fi
+    
 #Universal:
 UUSER_H="/home/$UUSER"
 OUTPUT="run_after.sh"
@@ -49,14 +54,21 @@ for param in ${ALL_PARAM[@]}; do
 		sudo apt-get install  python-all python-pygame python-pil python-serial python-pip python3 python3-all python3-pip --assume-yes
 		sudo bash python_latest_instal.sh
 		sudo apt autoremove --assume-yes
+		
 		### R e insync:
 		sudo apt-get install r-base r-base-dev --allow-unauthenticated  --assume-yes
-
 		wget https://download1.rstudio.org/rstudio-xenial-1.1.447-amd64.deb
 		sudo chmod +x rstudio-xenial-1.1.447-amd64.deb
 		sudo dpkg -i rstudio-xenial-1.1.447-amd64.deb
 		#rm -rf rstudio-xenial-1.1.447-amd64.deb
-		
+
+		###### JetBrains ###########
+		sudo apt install fuse
+		wget https://download.jetbrains.com/toolbox/jetbrains-toolbox-1.8.3868.tar.gz
+		tar -zxvf jetbrains-toolbox-1.8.3868.tar.gz
+		cd jetbrains-toolbox-1.8.3868/
+
+		####### INSYNC ######
 		sudo apt install insync --assume-yes
 		echo "insync start" >> $OUTPUT
 		###TODO: zotero
