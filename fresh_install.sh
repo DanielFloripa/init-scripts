@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #Misc:
-WARN='\033[0;31m'
+WARN='\033[1;31m'
 NC='\033[0m' # No Color
-BLUE='\033[0;34m'
+BLUE='\033[1;32m'
 ARGS=("config" "apt" "pip" "gui" "opencv" "drivers" "java" "poweroff" "reboot")
 
 if [ $# == 0 -a "$0" != "bash" ]; then
