@@ -1,11 +1,27 @@
 #!/bin/bash
 
+#Misc:
+WARN='\033[0;31m'
+NC='\033[0m' # No Color
+BLUE='\033[0;34m'
+ARGS=("config" "apt" "pip" "gui" "opencv" "drivers" "java" "poweroff" "reboot")
+
+if [ $# == 0 -a "$0" != "bash" ]; then
+	echo -e "\n\n${WARN} Parameters missing.
+	${BLUE}Execute: $0 <username> and <args>:
+	<${ARGS[@]}> ${NC}\n\n";
+	exit 0;
+elif [ "$EUID" -ne 0 ]; then
+	echo -e "\n\n ${WARN} \tPlease run as root!${NC}\n\n"
+	exit
+fi
+
 #Context:
 if [ "$0" == "bash" ]; then
-	USER="debian" # "ubuntu"
-	ALL_PARAM=("config" "apt" "java")
+	UUSER="debian" # "ubuntu"
+	ALL_PARAM=("config" "apt" "java" "pip" "gui")
 	APP="headless"
-	echo "Executing in server mode:" $USER ${ALL_PARAM[@]} $APP  
+	echo "Executing in server mode:" $UUSER ${ALL_PARAM[@]} $APP  
 	LEVEL=0
 else
 	ALL_PARAM=$@
@@ -14,28 +30,11 @@ else
 	LEVEL=1
 fi
 
-if [ "$EUID" -ne 0 ]; then
-	echo "Please run as root"
-	exit
-fi
-    
 #Universal:
 UUSER_H="/home/$UUSER"
 OUTPUT="run_after.sh"
 OS_NAME=`cat /etc/os-release | grep "HOME_URL" | cut -d'.' -f2 | cut -d'.' -f1`
 CODENAME=`cat /etc/os-release | grep "VERSION=" | cut -d'(' -f2 | cut -d')' -f1 | cut -d' ' -f1`
-
-#Misc:
-WARN='\033[0;31m'
-NC='\033[0m' # No Color
-BLUE='\033[0;34m'
-
-if [ $# == 0 -a "$0" != "bash" ]; then
-	echo -e "${WARN} Parameters missing.
-	${BLUE}Execute: $0 <username> <@args>
-	{ config || apt || opencv || drivers || java || poweroff/reboot}>${NC}";
-	exit 0;
-fi
 
 for param in ${ALL_PARAM[@]}; do
 	echo "Executing the" $param "parameter"
@@ -45,14 +44,14 @@ for param in ${ALL_PARAM[@]}; do
 		sudo apt autoremove
 		sudo apt-get -f install
 		sudo apt-get upgrade --assume-yes
-		sudo apt-get install ftp curl git zip vim bash-completion aptitude htop firmware-misc-nonfree --assume-yes
-		if [ $LEVEL > 1 ]; then 
-			sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular --assume-yes
-		fi
+		sudo apt-get install ftp curl git zip vim bash-completion aptitude htop firmware-misc-nonfree gksu terminator --assume-yes
 		sudo apt-get install geany gparted wine inkscape shutter filezilla dia vlc gnuplot sqlite sqlitebrowser --assume-yes
 		# @TODO:python-libs*
 		sudo apt-get install  python-all python-pygame python-pil python-serial python-pip python3 python3-all python3-pip --assume-yes
 		sudo bash python_latest_instal.sh
+		if [ $LEVEL > 1 ]; then 
+			sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular redshift --assume-yes
+		fi
 		sudo apt autoremove --assume-yes
 		
 		### R e insync:
@@ -230,7 +229,15 @@ for param in ${ALL_PARAM[@]}; do
 		sudo pip3 install --upgrade pip
 		sudo pip install awscli
 		sudo pip install python-openstackclient
-		
+	
+	elif [ "$param" == "gui" ]; then
+		su
+		# if in VM with SSH+RSA-key do:
+		# passwd 
+		apt-get update;apt-get upgrade
+		apt-get install xserver-xorg xserver-xorg-core xfonts-base xinit -y --no-install-recommends
+		apt-get install cinnamon-core lightdm libgl1-mesa-dri x11-xserver-utils --no-install-recommends
++		
 	############## Video Drivers ###############
 	elif [ "$param" == "drivers" ]; then
 		### Nvidia Drivers:
