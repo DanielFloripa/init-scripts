@@ -67,5 +67,5 @@ fi
 echo -e "\n\tThe result is:"
 id3tool "${RENAME}"
 
-echo -e "\n\tRemove original video?"
-rm -i "${NAME}"*
+echo -e "\n\tRemoving original video! : ${NAME}"
+rm -i ${NAME}*

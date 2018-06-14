@@ -27,7 +27,7 @@ else
 	ALL_PARAM=$@
 	UUSER="$1"
 	APP="dpkg"
-	LEVEL=1
+	LEVEL=2
 fi
 
 #Universal:
@@ -41,36 +41,60 @@ for param in ${ALL_PARAM[@]}; do
 	if [ "$param" == "apt" ]; then 
 		sudo apt-get update
 		sudo apt-get remove empathy akregator kmail kopete thunderbird pidgin hexchat banshee totem unity-webapps-common apport --assume-yes
+		sudo apt-get purge empathy akregator kmail kopete thunderbird pidgin hexchat banshee totem unity-webapps-common apport --assume-yes
 		sudo apt autoremove
 		sudo apt-get -f install
 		sudo apt-get upgrade --assume-yes
 		sudo apt-get install ftp curl git zip vim bash-completion aptitude htop firmware-misc-nonfree gksu terminator --assume-yes
 		sudo apt-get install geany gparted wine inkscape shutter filezilla dia vlc gnuplot sqlite sqlitebrowser --assume-yes
-		# @TODO:python-libs*
+		# @TODO:python-**libs**
 		sudo apt-get install  python-all python-pygame python-pil python-serial python-pip python3 python3-all python3-pip --assume-yes
-		sudo bash python_latest_instal.sh
+		if ! hash python3.6 2>/dev/null; then
+			sudo bash python_latest_install.sh
+		fi
 		if [ $LEVEL > 1 ]; then 
 			sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular redshift --assume-yes
 		fi
 		sudo apt autoremove --assume-yes
 		
-		### R e insync:
-		sudo apt-get install r-base r-base-dev --allow-unauthenticated  --assume-yes
-		wget https://download1.rstudio.org/rstudio-xenial-1.1.447-amd64.deb
-		sudo chmod +x rstudio-xenial-1.1.447-amd64.deb
-		sudo dpkg -i rstudio-xenial-1.1.447-amd64.deb
-		#rm -rf rstudio-xenial-1.1.447-amd64.deb
-
+		### Rstudio
+		if hash rstudio 2>/dev/null; then
+			echo -e "${BLUE} Rstudio already installed${NC}"
+		else
+			sudo apt-get install r-base r-base-dev --allow-unauthenticated  --assume-yes
+			VERS="xenial-1.1.447-amd64"
+			VERS="xenial-"`curl https://download1.rstudio.org/current.ver`"-amd64"
+			wget https://download1.rstudio.org/rstudio-${VERS}.deb -O rstudio.deb
+			sudo chmod +x rstudio.deb
+			sudo dpkg -i rstudio.deb
+			# ODBC: https://www.rstudio.com/products/drivers/download-commercial/
+			sudo wget https://drivers.rstudio.org/7C152C12/odbc-install.sh
+			sudo chmod +x odbc-install.sh
+			# sudo ./odbc-install.sh
+			sudo ./odbc-install.sh --fetch
+			sudo ./odbc-install.sh --extract
+			sudo ./odbc-install.sh --configure
+			#rm -rf rstudio.deb
+		fi
 		###### JetBrains ###########
-		sudo apt install fuse
-		wget https://download.jetbrains.com/toolbox/jetbrains-toolbox-1.8.3868.tar.gz
-		tar -zxvf jetbrains-toolbox-1.8.3868.tar.gz
-		cd jetbrains-toolbox-1.8.3868/
-
+		if hash charm 2>/dev/null; then
+			echo -e "${BLUE} PyCharm already installed${NC}"
+		else
+			VERS="1.8.3868"
+			sudo apt install fuse
+			wget https://download.jetbrains.com/toolbox/jetbrains-toolbox-${VERS}.tar.gz -O jetbrains-toolbox.tar.gz 
+			tar -zxvf jetbrains-toolbox.tar.gz
+			echo -e `pwd`"/jetbrains-toolbox/" >>  ${OUTPUT}
+		fi
 		####### INSYNC ######
 		sudo apt install insync --assume-yes
 		echo "insync start" >> $OUTPUT
 		###TODO: zotero
+		if hash zotero 2>/dev/null; then
+			echo -e "${BLUE} Zotero already installed${NC}"
+		else
+			bash zotero_installer.sh
+		fi
 		### Draw.io:
 		if hash draw.io 2>/dev/null; then
 			echo -e "${BLUE} Draw.io already installed${NC}"
@@ -229,14 +253,13 @@ for param in ${ALL_PARAM[@]}; do
 		sudo pip3 install --upgrade pip
 		sudo pip install awscli
 		sudo pip install python-openstackclient
-	
+		sudo pip install ospurge
+
 	elif [ "$param" == "gui" ]; then
-		su
-		# if in VM with SSH+RSA-key do:
-		# passwd 
-		apt-get update;apt-get upgrade
-		apt-get install xserver-xorg xserver-xorg-core xfonts-base xinit -y --no-install-recommends
-		apt-get install cinnamon-core lightdm libgl1-mesa-dri x11-xserver-utils --no-install-recommends
+		# if in VM with SSH+RSA-key, you need change passwd 
+		sudo apt-get update && sudo apt-get upgrade
+		sudo apt-get install xserver-xorg xserver-xorg-core xfonts-base xinit -y --no-install-recommends
+		sudo apt-get install cinnamon-core lightdm libgl1-mesa-dri x11-xserver-utils --no-install-recommends
 +		
 	############## Video Drivers ###############
 	elif [ "$param" == "drivers" ]; then
