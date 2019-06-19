@@ -200,17 +200,16 @@ for param in ${ALL_PARAM[@]}; do
 			sudo dpkg -i loffice/*/DEBS/*
 			sudo dpkg -i loffice-lp/*/DEBS/*
 		fi
-			if sudo grep "sublimetext" /etc/apt/sources.list > /dev/null; then
-				echo -e "${BLUE} Sublime sources already configured!${NC}"
-			else
-				sudo apt-get install -y apt-transport-https
-				sudo apt-get install dirmngr --assume-yes
-				sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
-				echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
-			fi			
-			sudo apt-get update
-			sudo apt-get install -y sublime-text
-		fi
+		if sudo grep "sublimetext" /etc/apt/sources.list > /dev/null; then
+			echo -e "${BLUE} Sublime sources already configured!${NC}"
+		else
+			sudo apt-get install -y apt-transport-https
+			sudo apt-get install dirmngr --assume-yes
+			sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
+			echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
+		fi			
+		sudo apt-get update
+		sudo apt-get install -y sublime-text
 		#
 		### Virtual Box
 		wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -

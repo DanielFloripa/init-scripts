@@ -68,4 +68,5 @@ echo -e "\n\tThe result is:"
 id3tool "${RENAME}"
 
 echo -e "\n\tRemoving original video! : ${NAME}"
+rm -i "${NAME}"*
 rm -i *.ogg *.opus
