@@ -419,7 +419,7 @@ for param in ${ALL_PARAM[@]}; do
 		mkdir -p build ; cd build
 		cmake -DENABLE_PRECOMPILED_HEADERS=OFF \
 			-DCMAKE_BUILD_TYPE=RELEASE \
-			-DCMAKE_INSTALL_PREFIX=/usr/local \
+			-DCMAKE_INSTALL_PREFIX=/usr/local
 		if sudo grep lib /etc/ld.so.conf.d/opencv.conf; then
 			echo -e "/usr/local/lib\n" | sudo tee --append /etc/ld.so.conf.d/opencv.conf > /dev/null
 		fi
