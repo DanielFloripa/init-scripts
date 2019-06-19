@@ -5,6 +5,7 @@ WARN='\033[1;31m'
 NC='\033[0m' # No Color
 BLUE='\033[1;32m'
 ARGS=("config" "apt" "pip" "gui" "opencv" "drivers" "java" "poweroff" "reboot")
+APT=("")
 
 if [ $# == 0 -a "$0" != "bash" ]; then
 	echo -e "\n\n${WARN} Parameters missing.
@@ -18,7 +19,7 @@ fi
 
 #Context:
 if [ "$0" == "bash" ]; then
-	UUSER="debian" # "ubuntu"
+	UUSER=${USER}
 	ALL_PARAM=("config" "apt" "java" "pip" "gui")
 	APP="headless"
 	echo "Executing in server mode:" $UUSER ${ALL_PARAM[@]} $APP  
@@ -40,125 +41,20 @@ for param in ${ALL_PARAM[@]}; do
 	echo "Executing the" $param "parameter"
 	if [ "$param" == "apt" ]; then 
 		sudo apt-get update
-		sudo apt-get remove empathy akregator kmail kopete thunderbird pidgin hexchat banshee totem unity-webapps-common apport --assume-yes
 		sudo apt autoremove
 		sudo apt-get -f install
 		sudo apt-get upgrade --assume-yes
-		sudo apt-get install ftp curl git zip vim bash-completion aptitude htop firmware-misc-nonfree gksu terminator --assume-yes
-		sudo apt-get install geany gparted wine inkscape shutter filezilla dia vlc gnuplot sqlite sqlitebrowser --assume-yes
-		# @TODO:python-libs*
-		sudo apt-get install  python-all python-pygame python-pil python-serial python-pip python3 python3-all python3-pip --assume-yes
+		sudo apt-get install screen ftp curl git zip vim screen bash-completion aptitude htop firmware-misc-nonfree gksu terminator sqlite  gparted--assume-yes
 		if ! hash python3.6 2>/dev/null; then
 			sudo bash python_latest_install.sh
 		fi
-		if [ $LEVEL > 1 ]; then 
-			sudo apt-get install texlive-full aspell-pt-br kde-l10n-ptbr kile-l10n okular redshift --assume-yes
-		fi
+		sudo apt-get install  python-all python-pygame python-pil python-serial python-pip python3 python3-all python3-pip --assume-yes
 		sudo apt autoremove --assume-yes
-		
-		### R e insync:
-		sudo apt-get install r-base r-base-dev --allow-unauthenticated  --assume-yes
-		VERS="xenial-1.1.447-amd64"
-		VERS="xenial-"`curl https://download1.rstudio.org/current.ver`"-amd64"
-		wget https://download1.rstudio.org/rstudio-${VERS}.deb -O rstudio.deb
-		sudo chmod +x rstudio.deb
-		sudo dpkg -i rstudio.deb
-		#rm -rf rstudio.deb
-
-		###### JetBrains ###########
-		if ! hash charm 2>/dev/null; then
-			VERS="1.8.3868"
-			sudo apt install fuse
-			wget https://download.jetbrains.com/toolbox/jetbrains-toolbox-${VERS}.tar.gz -O jetbrains-toolbox.tar.gz 
-			popd
-			tar -zxvf jetbrains-toolbox.tar.gz
-			echo -e `pwd`"/jetbrains-toolbox/" >>  ${OUTPUT}
-		fi
-		####### INSYNC ######
-		sudo apt install insync --assume-yes
-		echo "insync start" >> $OUTPUT
-		###TODO: zotero
-		if ! hash charm 2>/dev/null; then
-			bash zotero_installer.sh
-		fi
-		### Draw.io:
-		if hash draw.io 2>/dev/null; then
-			echo -e "${BLUE} Draw.io already installed${NC}"
+		### Rstudio
+		if hash R 2>/dev/null; then
+			echo -e "${BLUE} R already installed${NC}"
 		else
-			if [ ! -e draw.io* ]; then
-				VERS=`curl -s https://github.com/jgraph/drawio-desktop/releases/latest | cut -d"v" -f2 | cut -d "\"" -f1`
-				wget https://github.com/jgraph/drawio-desktop/releases/download/v$VERS/draw.io-amd64-$VERS.deb
-			fi
-			chmod +x draw.io*.deb
-			sudo dpkg -i draw.io*.deb
-		fi
-		if hash fslint-gui 2>/dev/null; then
-			echo -e "${BLUE} Fslint already installed${NC}"
-		else
-			sudo apt-get install debhelper python-glade2 --assume-yes
-			if [ ! -e fslint* ]; then git clone https://github.com/pixelb/fslint.git; fi
-			cd fslint
-			dpkg-buildpackage -I.git -rfakeroot -tc
-			sudo dpkg -i ../fslint*.deb
-			cd ../
-		fi
-		### Google Chrome:
-		if  hash google-chrome 2>/dev/null; then
-			echo -e "${BLUE} Chrome already installed${NC}"
-			if [ ! -e fslint* ]; then git clone https://github.com/pixelb/fslint.git; fi
-			cd fslint
-			dpkg-buildpackage -I.git -rfakeroot -tc
-			sudo dpkg -i ../fslint*.deb
-			cd ../
-		fi
-		### Google Chrome:
-		if  hash google-chrome 2>/dev/null; then
-			echo -e "${BLUE} Chrome already installed${NC}"
-		else
-			sudo apt-get install libxss1 libappindicator1 libindicator7 --assume-yes 
-			if [ ! -e google-chrome*.deb ]; then 
-				wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb; 
-			fi
-			chmod +x google-chrome-stable_current_amd64.deb 
-			sudo dpkg -i google-chrome-stable_current_amd64.deb 
-			echo "google-chrome" >> $OUTPUT
-		fi
-		### Youtube-DL:
-		if hash youtube-dl 2>/dev/null; then
-			echo -e "${BLUE} yt-dl already installed${NC}"
-		else
-			sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/bin/youtube-dl
-			sudo chmod a+rx /usr/bin/youtube-dl
-		fi
-		### Teamviewer
-		TV_VER="NEW"
-		if hash teamviewer 2>/dev/null; then 
-			echo -e "${BLUE} Teamviwer already installed${NC}"
-		elif [ "${TV_VER}" == "OLD" ]; then
-			sudo dpkg --add-architecture i386
-			sudo apt-get install libc6 libgcc1 libasound2 libdbus-1-3 libexpat1 libfontconfig1 libfreetype6 libjpeg62 libsm6 libxdamage1 libxext6 libxfixes3 libxinerama1 libxrandr2 libxrender1 libxtst6 zlib1g --assume-yes
-			sudo apt --fix-broken install
-			if [ ! -e teamviewer_i386.deb ]; then wget https://download.teamviewer.com/download/teamviewer_i386.deb; fi
-			sudo dpkg -i teamviewer_i386.deb 
-			sudo apt-get install -f
-			echo "teamviewer" >> $OUTPUT
-			sudo dpkg --add-architecture amd64
-		else
-			if [ ! -e teamviewer_amd64.deb ]; then
-				wget https://download.teamviewer.com/download/linux/teamviewer_amd64.deb
-			fi
-			chmod +x teamviewer_amd64.deb
-			sudo dpkg -i teamviewer_amd64.deb
-			sudo apt-get -f install
-			echo "teamviewer" >> $OUTPUT
-		fi
-		#### AnyDesk  #####
-		if hash anydesk 2>/dev/null; then 
-			echo -e "${BLUE} AnyDesk already installed${NC}"
-		else
-			wget https://download.anydesk.com/linux/anydesk_2.9.5-1_amd64.deb
-			sudo dpkg -i anydesk_2.9.5-1_amd64.deb
-			sudo apt -f install
+			sudo apt-get install r-base r-base-dev --allow-unauthenticated  --assume-yes
 		fi
 		### Dropbox
 		if hash dropbox 2>/dev/null; then 
@@ -172,54 +68,7 @@ for param in ${ALL_PARAM[@]}; do
 			sudo ln -fs $DBOX_F/dropbox.py /usr/bin/dropbox
 			sudo apt -f install -y && sudo apt install python-gpgme -y
 			echo "$DBOX_F/dropboxd" >> $OUTPUT
-		else
-			if [ ! -e dropbox*.deb ]; then 
-				wget https://linux.dropbox.com/packages/$OS_NAME/dropbox_2015.10.28_amd64.deb
-			fi
-			sudo apt -f install 
-			chmod +x dropbox* 
-			sudo dpkg -i dropbox*.deb
-			sudo apt -f install
-			echo "dropbox start -i" >> $OUTPUT
 		fi
-		### LibreOffice:
-		if hash libreoffice 2>/dev/null; then
-			echo -e "${BLUE} Libreoffice already installed.${NC}"
-		else
-			VERS="6.0.4"
-			FILEBASE="LibreOffice_${VERS}_Linux_x86-64_deb"
-			if [ ! -e libreoffice*.tar.gz ]; then
-				wget http://download.documentfoundation.org/libreoffice/stable/${VERS}/deb/x86_64/${FILEBASE}.tar.gz
-				wget http://download.documentfoundation.org/libreoffice/stable/${VERS}/deb/x86_64/${FILEBASE}_langpack_pt-BR.tar.gz
-			fi
-			mkdir loffice loffice-lp
-			tar -zxvf ${FILEBASE}.tar.gz -C loffice
-			tar -zxvf ${FILEBASE}_langpack_pt-BR.tar.gz -C loffice-lp
-			chmod +x loffice/*/DEBS/*
-			chmod +x loffice-lp/*/DEBS/*
-			sudo dpkg -i loffice/*/DEBS/*
-			sudo dpkg -i loffice-lp/*/DEBS/*
-		fi
-			if sudo grep "sublimetext" /etc/apt/sources.list > /dev/null; then
-				echo -e "${BLUE} Sublime sources already configured!${NC}"
-			else
-				sudo apt-get install -y apt-transport-https
-				sudo apt-get install dirmngr --assume-yes
-				sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
-				echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
-			fi			
-			sudo apt-get update
-			sudo apt-get install -y sublime-text
-		fi
-		#
-		### Virtual Box
-		wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
-		#"add to /etc/apt/sources.list:"
-		echo "deb http://download.virtualbox.org/virtualbox/$OS_NAME $CODENAME contrib" >> /etc/apt/sources.list
-		sudo apt-get update
-		sudo apt-get install -y dkms
-		#sudo apt-get install -y virtualbox-5.1
-		#wget http://download.virtualbox.org/\virtualbox/5.1.28/Oracle_VM_VirtualBox_Extension_Pack-5.1.28-117968.vbox-extpack
 		### lamp stack:
 		#sudo ./lamp.sh "abcde"
 		#""" NodeJS NPM:"""
@@ -229,10 +78,6 @@ for param in ${ALL_PARAM[@]}; do
 		sudo apt-get install -y build-essential
 		curl -L https://www.npmjs.com/install.sh | sudo -E bash -
 		### iphone drivers
-		
-		if [ $LEVEL > 2 ]; then 
-			bash iphone.sh install
-		fi
 	
 	elif [ "$param" == "pip" ]; then
 		sudo pip install --upgrade pip
@@ -246,64 +91,24 @@ for param in ${ALL_PARAM[@]}; do
 		sudo apt-get update && sudo apt-get upgrade
 		sudo apt-get install xserver-xorg xserver-xorg-core xfonts-base xinit -y --no-install-recommends
 		sudo apt-get install cinnamon-core lightdm libgl1-mesa-dri x11-xserver-utils --no-install-recommends
-+		
-	############## Video Drivers ###############
-	elif [ "$param" == "drivers" ]; then
-		### Nvidia Drivers:
-		sudo aptitude update
-		sudo aptitude -r install linux-headers-$(uname -r|sed 's,[^-]*-[^-]*-,,') nvidia-legacy-340xx-driver
-		sudo aptitude -r install nvidia-xconfig
-		echo "nvidia-xconfig" >> $OUTPUT
-		
+	
 	############## CONFIGURATIONS ###############
 	elif [ "$param" == "config" ]; then
-		sudo usermod -a -G sudo $UUSER
-		if sudo grep "$UUSER ALL=(ALL:ALL) ALL" /etc/sudoers; then
-			echo -e "${BLUE} Sudoers already configured!${NC}"
-		else
-			echo "$UUSER ALL=(ALL:ALL) ALL" | sudo tee --append /etc/sudoers
-		fi
-		sudo adduser daniel --add_extra_groups sudo
 		### BASH history to infinity:
 		sudo sed -e "s/^HISTSIZE.*$/HISTSIZE=-1/" -i $UUSER_H/.bashrc
 		sudo sed -e "s/^HISTFILESIZE.*$/HISTFILESIZE=-1/" -i $UUSER_H/.bashrc
 		### NON-Free repo:
-		if sudo grep non-free /etc/apt/sources.list; then
-			echo -e "${BLUE} Non-free sources already configured!${NC}"
-		else
-			echo "deb http://httpredir.debian.org/debian/ stretch main contrib non-free" | sudo tee --append /etc/apt/sources.list > /dev/null
-		fi
+		
 		### Cran-R:
 		if sudo grep "cran-r" /etc/apt/sources.list; then
 			echo -e "${BLUE} R sources already configured!${NC}"
 		else
-		udo apt-get install unixodbc unixodbc-devsudo apt-get install unixodbc unixodbc-devIiii
 			sudo apt-get install dirmngr --assume-yes
 			sudo apt-key adv --keyserver keys.gnupg.net --recv-key 6212B7B7931C4BB16280BA1306F90DE5381BA480
 			# sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
 			echo "deb http://cran-r.c3sl.ufpr.br/bin/linux/$OS_NAME stretch-cran34/" | sudo tee --append /etc/apt/sources.list > /dev/null
 		fi
-		### Insync:
-		if sudo grep "insynchq" /etc/apt/sources.list; then
-			echo -e "${BLUE} Insync sources already configured!${NC}"
-		else
-		else
-		else
-		else
-			sudo apt-get install dirmngr --assume-yes
-			#sudo apt-key adv --keyserver keys.gnupg.net --recv-key 6212B7B7931C4BB16280BA1306F90DE5381BA480
-			gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
-			sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-			# sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
-			echo "deb http://cran-r.c3sl.ufpr.br/bin/linux/$OS_NAME stretch-cran35/" | sudo tee --append /etc/apt/sources.list > /dev/null
-		fi
-		### Insync:
-		if sudo grep "insynchq" /etc/apt/sources.list; then
-			echo -e "${BLUE} Insync sources already configured!${NC}"
-		else
-			wget -qO - https://d2t3ff60b2tol4.cloudfront.net/services@insynchq.com.gpg.key \ | sudo apt-key add -
-			echo "deb http://apt.insynchq.com/$OS_NAME stretch non-free" | sudo tee --append /etc/apt/sources.list > /dev/null
-		fi
+		
 		sudo apt-get update
 
 	############## JAVA ORACLE ###############
@@ -320,7 +125,7 @@ for param in ${ALL_PARAM[@]}; do
 		fi
 		ARCH_TYPE=`dpkg --print-architecture`
 		MASTERV="8" #`curl -s https://www.java.com/pt_BR/download/ | grep Version | cut -d' ' -f2`
-		MIDDLEV="211" #`curl -s https://www.java.com/pt_BR/download/ | grep Version | cut -d' ' -f4`
+		MIDDLEV="144" #`curl -s https://www.java.com/pt_BR/download/ | grep Version | cut -d' ' -f4`
 		VERSION="${MASTERV}u${MIDDLEV}"
 		SUBVERSION="b01"
 		FILE="jdk-$VERSION-linux-$ARCH.tar.gz"
@@ -424,6 +229,20 @@ for param in ${ALL_PARAM[@]}; do
 		cmake -DENABLE_PRECOMPILED_HEADERS=OFF \
 			-DCMAKE_BUILD_TYPE=RELEASE \
 			-DCMAKE_INSTALL_PREFIX=/usr/local \
+			-DINSTALL_C_EXAMPLES=OFF \
+			-DINSTALL_PYTHON_EXAMPLES=ON \
+			-DOPENCV_EXTRA_MODULES_PATH=$INSTALL_DIR/opencv_contrib-3.1.0/modules \
+			-DBUILD_EXAMPLES=ON ..
+
+		#echo 'Step 6: demora cerca de 3.5 a 4 horas'
+		make -j4 #(I prefer -j3, because it doesnt use all the cores so it keeps the RasPi cool enough)
+		echo -e "${WARN} Se algum erro ocorrer e o processo falhar ao continuar, execute: make clean${NC}"
+		# Sometimes using multicores can cause problems, so if you face any problems just execute make, but keep in mind that 
+		# it will take much longer so be patient as much as you can and grab your cup of tea.'
+		# Step 7: install 'build' prepared in step 5'
+		sudo make install
+		sudo ldconfig
+		#Edit opencv.conf and bash.bashrc'. Note opencv.conf will be blank
 		if sudo grep lib /etc/ld.so.conf.d/opencv.conf; then
 			echo -e "/usr/local/lib\n" | sudo tee --append /etc/ld.so.conf.d/opencv.conf > /dev/null
 		fi
