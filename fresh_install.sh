@@ -286,9 +286,6 @@ for param in ${ALL_PARAM[@]}; do
 		if sudo grep "insynchq" /etc/apt/sources.list; then
 			echo -e "${BLUE} Insync sources already configured!${NC}"
 		else
-		else
-		else
-		else
 			sudo apt-get install dirmngr --assume-yes
 			#sudo apt-key adv --keyserver keys.gnupg.net --recv-key 6212B7B7931C4BB16280BA1306F90DE5381BA480
 			gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
